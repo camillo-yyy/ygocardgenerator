@@ -2,11 +2,25 @@
 from PIL import Image, ImageFont, ImageDraw 
 import textwrap
 import json
+import requests
+from io import BytesIO
 
 #================================================== FUNCTIONS ===========================================================
 
 #function to generate an effect monster
-def monstercreate(myimage, name, text):
+def monstercreate(myimage, atk, dff, level, attribute, race):
+
+	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+
+	json_data = response.json() if response and response.status_code == 200 else None
+
+	name = json_data['name']
+
+	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+
+	json_data = response.json() if response and response.status_code == 200 else None
+
+	text = json_data['desc']
 
 	# fetching template
 	image = Image.open("img/me_template.png")
@@ -48,7 +62,20 @@ def monstercreate(myimage, name, text):
 
 
 #function to generate an effect monster
-def spellcreate(myimage, name, text):
+def spellcreate(myimage):
+
+	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+
+	json_data = response.json() if response and response.status_code == 200 else None
+
+	name = json_data['name']
+
+	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+
+	json_data = response.json() if response and response.status_code == 200 else None
+
+	text = json_data['desc']
+	race = json_data['race']
 
 	# fetching template
 	image = Image.open("img/spell_template.png")
@@ -90,7 +117,21 @@ def spellcreate(myimage, name, text):
 
 
 #function to generate an effect monster
-def trapcreate(myimage, name, text):
+def trapcreate(myimaget):
+
+	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+
+	json_data = response.json() if response and response.status_code == 200 else None
+
+	name = json_data['name']
+
+	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+
+	json_data = response.json() if response and response.status_code == 200 else None
+	
+	text = json_data['desc']
+	race = json_data['race']
+
 
 	# fetching template
 	image = Image.open("img/trap_template.png")
@@ -133,18 +174,28 @@ def trapcreate(myimage, name, text):
 #=======================================================================================================================
 #============================================== MAIN ===================================================================
 
+# getting random type from json
+response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+
+json_data = response.json() if response and response.status_code == 200 else None
+
+type = json_data['type']
+linkImg = json_data['id']
+linkImg = str(linkImg)
+
 # getting parameters
-my_image = Image.open("img/skystriker.png")
+response2 = requests.get("https://images.ygoprodeck.com/images/cards_cropped/"+linkImg+".jpg")
+my_image = Image.open(BytesIO(response2.content))
 
-name = "Blue-Eyes Black Magician"
 
-text = "You can only Special Summon once per turn. When this card declares an attack: You can place 1 Spell Counter on it. Once per opponent's turn (Quick Effect): You can remove 3 Spell Counters from your field; Special Summon 1 monster from your Deck that you can place a Spell Counter on. If this card in the Monster Zone is destroyed: You can place this card in your Pendulum Zone, then place the same number of Spell Counters on it that it had as a monster."
-
-attribute = "spell"
-
-if attribute == "spell":
-	spellcreate(my_image, name, text)
-elif attribute == "trap":
-	trapcreate(my_image, name, text)
+if type == "Spell Card":
+	spellcreate(my_image)
+elif type == "Trap Card":
+	trapcreate(my_image)
 else:
-	monstercreate(my_image, name, text)
+	atk = json_data['atk']
+	dff = json_data['def']
+	level = json_data['level']
+	attribute = json_data['attribute']
+	race = json_data['race']
+	monstercreate(my_image, atk, dff, level, attribute, race)
