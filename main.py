@@ -1,201 +1,237 @@
 #================================================== LIBRARIES ===========================================================
 from PIL import Image, ImageFont, ImageDraw 
 import textwrap
-import json
 import requests
 from io import BytesIO
 
-#================================================== FUNCTIONS ===========================================================
+#================================================== CLASSES ===========================================================
+class Card:
 
-#function to generate an effect monster
-def monstercreate(myimage, atk, dff, level, attribute, race):
+    # Attributes
+    type = ''
+    name = ''
+    text = ''
+    atf = ''
+    dff = ''
+    level = ''
+    attribute = ''
+    race = ''
 
-	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+    def randomSeed(self):
 
-	json_data = response.json() if response and response.status_code == 200 else None
+        response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
 
-	name = json_data['name']
+        json_data = response.json() if response and response.status_code == 200 else None
 
-	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
+        return json_data
 
-	json_data = response.json() if response and response.status_code == 200 else None
+    def getType(self):
 
-	text = json_data['desc']
+        json_data = self.randomSeed()
 
-	# fetching template
-	image = Image.open("img/me_template.png")
+        # getting random type from json
+        return json_data['type']
 
-	title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 60)
+    def getName(self):
 
-	if(len(text) < 300):
-		effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 25)
-		width=58
-	else:
-		effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 18)
-		width=85
+        json_data = self.randomSeed()
 
-	title_text = name
+        return json_data['name']
 
-	image_editable = ImageDraw.Draw(image)
+    def getDesc(self):
 
-	image_editable.text((72,69), title_text, (0, 0, 0), font=title_font)
+        json_data = self.randomSeed()
 
-	caption = text;
+        return json_data['desc']
+
+    def getAtk(self):
+
+        json_data = self.randomSeed()
+
+        return json_data['atk']	
+
+    def getDef(self):
+
+        json_data = self.randomSeed()
+
+        return json_data['def']
+    
+    def getAttribute(self):
+
+        json_data = self.randomSeed()
+
+        return json_data['attribute']
+
+    def getLevel(self):
+
+        json_data = self.randomSeed()
+
+        return json_data['level']
+
+    def getRace(self):
+
+        json_data = self.randomSeed()
+
+        return json_data['race']
+
+    def getImage(self):
+
+        json_data = self.randomSeed()
+
+        linkImg = json_data['id']
+        linkImg = str(linkImg)
+
+        # getting parameters
+        response2 = requests.get("https://images.ygoprodeck.com/images/cards_cropped/"+linkImg+".jpg")
+        my_image = Image.open(BytesIO(response2.content))
+
+        return my_image
+
+    def __init__(self):  
+        self.type = self.getType()
+
+    def printCard(self, image, myimage):
+
+        img_resized = myimage.resize((650, 650), Image.Resampling.LANCZOS)
+
+        #acquisizione
+        back_im = image.copy()
+        back_im.paste(img_resized, (90, 220))
+        back_im.save('result.jpg', quality=95)
+
+    # Method
+    def monsterGen(self):
+
+        myimage = self.getImage()
+        
+        caption = self.getDesc()
+
+        title_text = self.getName()
+
+        # fetching template
+        image = Image.open("img/me_template.png")
+
+        if(len(title_text)<20):
+            title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 80)
+        else:
+            title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 55)
+
+        if(len(caption) < 400):
+            effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 25)
+            width=58
+        else:
+            effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 15)
+            width=85
+    
+        image_editable = ImageDraw.Draw(image)
+
+        image_editable.text((72,69), title_text, (0, 0, 0), font=title_font)
+
+        wrapper = textwrap.TextWrapper(width) 
+        word_list = wrapper.wrap(text=caption) 
+        caption_new = ''
+        for ii in word_list[:-1]:
+            caption_new = caption_new + ii + '\n'
+        caption_new += word_list[-1]
+
+        margin = 70
+        offset = 920
+        image_editable.text((margin, offset), caption_new, font=effect_font, fill="#000000")
+
+        self.printCard(image, myimage)
+
+    def spellGen(self):
+
+        myimage = self.getImage()
+
+        title_text = self.getName()
+
+        caption = self.getDesc()
+
+        # fetching template
+        image = Image.open("img/spell_template.png")
+
+        if(len(title_text)<20):
+            title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 80)
+        else:
+            title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 55)
+
+        if(len(caption) < 400):
+            effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 25)
+            width=58
+        else:
+            effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 15)
+            width=85
+
+        image_editable = ImageDraw.Draw(image)
+
+        image_editable.text((72,69), title_text, (0, 0, 0), font=title_font)
+
+        wrapper = textwrap.TextWrapper(width) 
+        word_list = wrapper.wrap(text=caption) 
+        caption_new = ''
+        for ii in word_list[:-1]:
+            caption_new = caption_new + ii + '\n'
+        caption_new += word_list[-1]
+
+        margin = 70
+        offset = 900
+        image_editable.text((margin, offset), caption_new, font=effect_font, fill="#000000")
+
+        self.printCard(image, myimage)
+
+    def trapGen(self):
+        
+        myimage = self.getImage()
+        
+        title_text = self.getName()
+
+        caption = self.getDesc()
+
+        # fetching template
+        image = Image.open("img/trap_template.png")
+
+        if(len(title_text)<20):
+            title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 80)
+        else:
+            title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 55)
+
+        if(len(caption) < 400):
+            effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 25)
+            width=58
+        else:
+            effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 15)
+            width=85
+
+        image_editable = ImageDraw.Draw(image)
+
+        image_editable.text((72,69), title_text, (0, 0, 0), font=title_font)
+
+        wrapper = textwrap.TextWrapper(width) 
+        word_list = wrapper.wrap(text=caption) 
+        caption_new = ''
+        for ii in word_list[:-1]:
+            caption_new = caption_new + ii + '\n'
+        caption_new += word_list[-1]
+
+        margin = 70
+        offset = 900
+        image_editable.text((margin, offset), caption_new, font=effect_font, fill="#000000")
+
+        self.printCard(image, myimage)
 
 
 
-	wrapper = textwrap.TextWrapper(width) 
-	word_list = wrapper.wrap(text=caption) 
-	caption_new = ''
-	for ii in word_list[:-1]:
-		caption_new = caption_new + ii + '\n'
-	caption_new += word_list[-1]
-
-	margin = 70
-	offset = 920
-	image_editable.text((margin, offset), caption_new, font=effect_font, fill="#000000")
-
-	#acquisizione
-	back_im = image.copy()
-	back_im.paste(myimage, (100, 220))
-	back_im.save('result.jpg', quality=95)
-
-
-#function to generate an effect monster
-def spellcreate(myimage):
-
-	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
-
-	json_data = response.json() if response and response.status_code == 200 else None
-
-	name = json_data['name']
-
-	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
-
-	json_data = response.json() if response and response.status_code == 200 else None
-
-	text = json_data['desc']
-	race = json_data['race']
-
-	# fetching template
-	image = Image.open("img/spell_template.png")
-
-	title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 60)
-
-	if(len(text) < 300):
-		effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 25)
-		width=58
-	else:
-		effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 18)
-		width=85
-
-	title_text = name
-
-	image_editable = ImageDraw.Draw(image)
-
-	image_editable.text((72,69), title_text, (0, 0, 0), font=title_font)
-
-	caption = text;
-
-
-
-	wrapper = textwrap.TextWrapper(width) 
-	word_list = wrapper.wrap(text=caption) 
-	caption_new = ''
-	for ii in word_list[:-1]:
-		caption_new = caption_new + ii + '\n'
-	caption_new += word_list[-1]
-
-	margin = 70
-	offset = 900
-	image_editable.text((margin, offset), caption_new, font=effect_font, fill="#000000")
-
-	#acquisizione
-	back_im = image.copy()
-	back_im.paste(myimage, (100, 220))
-	back_im.save('result.jpg', quality=95)
-
-
-#function to generate an effect monster
-def trapcreate(myimaget):
-
-	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
-
-	json_data = response.json() if response and response.status_code == 200 else None
-
-	name = json_data['name']
-
-	response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
-
-	json_data = response.json() if response and response.status_code == 200 else None
-	
-	text = json_data['desc']
-	race = json_data['race']
-
-
-	# fetching template
-	image = Image.open("img/trap_template.png")
-
-	title_font = ImageFont.truetype('fonts/Yu-Gi-Oh!1.ttf', 60)
-
-	if(len(text) < 300):
-		effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 25)
-		width=58
-	else:
-		effect_font = ImageFont.truetype('fonts/Yu-Gi-Oh!2.ttf', 18)
-		width=85
-
-	title_text = name
-
-	image_editable = ImageDraw.Draw(image)
-
-	image_editable.text((72,69), title_text, (0, 0, 0), font=title_font)
-
-	caption = text;
-
-
-
-	wrapper = textwrap.TextWrapper(width) 
-	word_list = wrapper.wrap(text=caption) 
-	caption_new = ''
-	for ii in word_list[:-1]:
-		caption_new = caption_new + ii + '\n'
-	caption_new += word_list[-1]
-
-	margin = 70
-	offset = 900
-	image_editable.text((margin, offset), caption_new, font=effect_font, fill="#000000")
-
-	#acquisizione
-	back_im = image.copy()
-	back_im.paste(myimage, (100, 220))
-	back_im.save('result.jpg', quality=95)
 
 #=======================================================================================================================
 #============================================== MAIN ===================================================================
 
-# getting random type from json
-response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
 
-json_data = response.json() if response and response.status_code == 200 else None
+randomCard = Card()
 
-type = json_data['type']
-linkImg = json_data['id']
-linkImg = str(linkImg)
-
-# getting parameters
-response2 = requests.get("https://images.ygoprodeck.com/images/cards_cropped/"+linkImg+".jpg")
-my_image = Image.open(BytesIO(response2.content))
-
-
-if type == "Spell Card":
-	spellcreate(my_image)
-elif type == "Trap Card":
-	trapcreate(my_image)
+if randomCard.getType() == "Spell Card":
+    randomCard.spellGen()
+elif randomCard.getType() == "Trap Card":
+    randomCard.trapGen()
 else:
-	atk = json_data['atk']
-	dff = json_data['def']
-	level = json_data['level']
-	attribute = json_data['attribute']
-	race = json_data['race']
-	monstercreate(my_image, atk, dff, level, attribute, race)
+    randomCard.monsterGen()
