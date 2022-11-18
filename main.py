@@ -92,11 +92,11 @@ class Card:
 
     def printCard(self, image, myimage):
 
-        img_resized = myimage.resize((650, 650), Image.Resampling.LANCZOS)
+        img_resized = myimage.resize((582, 585), Image.Resampling.LANCZOS)
 
         #acquisizione
         back_im = image.copy()
-        back_im.paste(img_resized, (90, 220))
+        back_im.paste(img_resized, (115, 244))
         back_im.save('result.jpg', quality=95)
 
     # Method
