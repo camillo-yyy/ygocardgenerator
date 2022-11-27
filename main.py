@@ -1,5 +1,5 @@
 #================================================== LIBRARIES ===========================================================
-from PIL import Image, ImageFont, ImageDraw 
+from PIL import Image, ImageFont, ImageDraw  #pip install pillow , pip install python-resize-image
 import textwrap
 import requests
 from io import BytesIO
@@ -17,6 +17,7 @@ class Card:
     attribute = ''
     race = ''
 
+    # Methods
     def randomSeed(self):
 
         response = requests.get('https://db.ygoprodeck.com/api/v7/randomcard.php')
@@ -87,6 +88,7 @@ class Card:
 
         return my_image
 
+    # CONSTRUCTOR 
     def __init__(self):  
         self.type = self.getType()
 
@@ -107,6 +109,16 @@ class Card:
         caption = self.getDesc()
 
         title_text = self.getName()
+
+        attribute = self.getAttribute()
+
+        race = self.getRace()
+
+        level = self.getLevel()
+
+        atk = self.getAtk()
+
+        dff = self.getDef()
 
         # fetching template
         image = Image.open("img/me_template.png")
